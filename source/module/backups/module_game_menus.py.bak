@@ -41,7 +41,7 @@ from compiler import *
 game_menus = [
   ("start_game_0",menu_text_color(0xFF000000)|mnf_disable_all_keys,
   ##diplomacy begin
-    "Welcome, adventurer, to Diplomacy for Mount & Blade: Warband. Before beginning the game you must create your character. Remember that in the traditional medieval society depicted in the game, war and politics are usually dominated by male members of the nobility. That does not however mean that you should not choose to play a female character, or one who is not of noble birth. Male nobles may have a somewhat easier start, but women and commoners can attain all of the same goals -- and in fact may have a much more interesting if more challenging early game.",
+    "Welcome, adventurer, to DiploVexed for Mount & Blade: Warband. Before beginning the game you must create your character. Remember that in the traditional medieval society depicted in the game, war and politics are usually dominated by male members of the nobility. That does not however mean that you should not choose to play a female character, or one who is not of noble birth. Male nobles may have a somewhat easier start, but women and commoners can attain all of the same goals -- and in fact may have a much more interesting if more challenging early game.",
   ##diplomacy end
   "none",
     [],
@@ -2433,11 +2433,11 @@ game_menus = [
 
 
    (try_for_range, ":companion", companions_begin, companions_end),
-		# (str_clear, s2),
+	    #(str_clear, s2), #v
 		(str_clear, s3),
 
 		(try_begin),
-			# (troop_get_slot, ":days_left", ":companion", slot_troop_days_on_mission),
+		    (troop_get_slot, ":days_left", ":companion", slot_troop_days_on_mission), 
 
 			(troop_slot_eq, ":companion", slot_troop_occupation, slto_player_companion),
             #SB : replace the call
@@ -2596,7 +2596,6 @@ game_menus = [
        ),
     ]
   ),
-
 
 
 
@@ -3497,7 +3496,7 @@ TOTAL:  {reg5}"),
         ]
     ),
 
-##diplomacy end
+##diplomacy end #vexed
       ("camp_action",[],"Take an action.",
        [(jump_to_menu, "mnu_camp_action"),
         ]
@@ -9741,59 +9740,12 @@ TOTAL:  {reg5}"),
            (jump_to_menu, "mnu_recruit_volunteers"),
          (try_end),
         ]),
-      ("village_center",[(call_script, "script_cf_village_normal_cond", "$current_town"), #SB : script condition
-       ]
-       ,"Go to the village center.",
-       [
-          (try_begin),
-            (call_script, "script_cf_enter_center_location_bandit_check"),
-          (else_try),
-            (party_get_slot, ":village_scene", "$current_town", slot_castle_exterior),
-            (modify_visitors_at_site,":village_scene"),
-            (reset_visitors),
-            (party_get_slot, ":village_elder_troop", "$current_town",slot_town_elder),
-            (set_visitor, 11, ":village_elder_troop"),
-            ##diplomacy begin
-            (try_begin),
-              (gt, "$g_player_chamberlain", 0),
-              (call_script, "script_dplmc_appoint_chamberlain"),  #fix for wrong troops after update
-              (party_get_slot, ":town_lord", "$current_town", slot_town_lord),
-              (eq, ":town_lord", "trp_player"),
-              (set_visitor, 9, "$g_player_chamberlain"),
-            (try_end),
-            ##diplomacy end
-
-
-           (call_script, "script_init_town_walkers"),
-
-           (try_begin),
-             (check_quest_active, "qst_hunt_down_fugitive"),
-             (neg|is_currently_night),
-             (quest_slot_eq, "qst_hunt_down_fugitive", slot_quest_target_center, "$current_town"),
-             (neg|check_quest_concluded, "qst_hunt_down_fugitive"), #SB : other condition
-             (neg|check_quest_succeeded, "qst_hunt_down_fugitive"),
-             (neg|check_quest_failed, "qst_hunt_down_fugitive"),
-             (set_visitor, 45, "trp_fugitive"),
-           (try_end),
-
-           (set_jump_mission,"mt_village_center"),
-           (jump_to_scene,":village_scene"),
-           (change_screen_mission),
-         (try_end),
-        ],"Door to the village center."),
        ##diplomacy begin
-      ("dplmc_village_elder_meeting",[
-         (call_script, "script_cf_village_normal_cond", "$current_town"), #SB : conditional check
-	   ##diplomacy start+
-		#rubik had a good idea: only enable this after having met the village elder
-		(party_get_slot, ":village_elder_troop", "$current_town",slot_town_elder),
-		(gt, ":village_elder_troop", 0),
-		(this_or_next|eq, "$cheat_mode", 1),#Always can jump to village elder in cheat mode
-		(this_or_next|eq, "$players_kingdom", "$g_encountered_party_faction"), #allow when member
-        (troop_slot_ge,":village_elder_troop", slot_troop_met, 1),
-		##diplomacy end+
-       ]
-       ,"Meet the Village Elder.",
+ 		#SW - Talk to village elder START     
+      ("village_elder_talk",[(neg|party_slot_eq, "$current_town", slot_village_state, svs_looted),
+                         (neg|party_slot_eq, "$current_town", slot_village_state, svs_being_raided),
+                         (neg|party_slot_ge, "$current_town", slot_village_infested_by_bandits, 1),]
+       ,"Speak with the Village Elder.",
        [
          (try_begin),
            (call_script, "script_cf_enter_center_location_bandit_check"),
@@ -9803,36 +9755,25 @@ TOTAL:  {reg5}"),
            (reset_visitors),
            (party_get_slot, ":village_elder_troop", "$current_town",slot_town_elder),
            (set_visitor, 11, ":village_elder_troop"),
-           (try_begin), #SB : supporting village_elder_found_chamberlain dialog option
-              (party_slot_eq, "$current_town", slot_town_lord, "trp_player"),
-              (eq, "$g_player_chamberlain", "trp_dplmc_chamberlain"),
-              (set_visitor, 9, "$g_player_chamberlain"),
+
+           (call_script, "script_init_town_walkers"),
+
+           (try_begin),
+             (check_quest_active, "qst_hunt_down_fugitive"),
+             (neg|is_currently_night),
+             (quest_slot_eq, "qst_hunt_down_fugitive", slot_quest_target_center, "$current_town"),
+             (neg|check_quest_succeeded, "qst_hunt_down_fugitive"),
+             (neg|check_quest_failed, "qst_hunt_down_fugitive"),
+             (set_visitor, 45, "trp_fugitive"),
            (try_end),
 
            (set_jump_mission,"mt_village_center"),
            (jump_to_scene,":village_scene"),
+
            (change_screen_map_conversation, ":village_elder_troop"),
          (try_end),
-        ]),
-      ##diplomacy end
-	##diplomacy start+
-	#If you can't jump to the village elder, explain why
-    ("dplmc_village_elder_meeting_denied",
-	[
-		#Only show this when the player would get the rest of the village menus
-        (call_script, "script_cf_village_normal_cond", "$current_town"), #SB : script condition
-	    #There is a valid village elder, and you haven't met him,
-		#and there isn't another condition that enables the jump.
-		(party_get_slot, ":village_elder_troop", "$current_town",slot_town_elder),
-		(gt, ":village_elder_troop", 0),
-		(eq, "$cheat_mode", 0),
-		(troop_slot_eq, ":village_elder_troop", slot_troop_met, 0),
-		(disable_menu_option),
-		],
-       "You have not met the village elder yet.",
-       [
-     ]),
-	 ##diplomacy end+
+        ],"Door to the village center."),
+#SW - Talk to village elder END
       ("village_buy_food",[(party_slot_eq, "$current_town", slot_village_state, svs_normal),
                            (neg|party_slot_ge, "$current_town", slot_village_infested_by_bandits, 1),
                            ],"Buy supplies from the peasants.",
@@ -12607,7 +12548,9 @@ TOTAL:  {reg5}"),
           (store_faction_of_party, ":current_town_faction", "$current_town"),
           (neq, ":current_town_faction", "fac_player_supporters_faction"),
           (party_get_num_companions, ":num_men", "p_main_party"),
-          (store_div, reg1, ":num_men", 4),
+##++START-VEXED++##
+          (store_div, reg1, ":num_men", 10),
+##++END-VEXED++##
           (val_add, reg1, 1),
           (str_store_string, s1, "@ ({reg1} denars per night)"),
           (store_troop_gold, ":gold", "trp_player"),
@@ -12698,82 +12641,30 @@ TOTAL:  {reg5}"),
       [
         (jump_to_menu, "mnu_collect_taxes"),
       ]),
-      ##diplomacy begin
+	  	         ##GUILD MASTER START
       ("dplmc_guild_master_meeting",
        [(party_slot_eq,"$current_town",slot_party_type, spt_town),
-	    ##nested diplomacy start+
-		#rubik had a good idea: only enable this after meeting the guild master
-		(assign, ":can_meet_guild_master", 0),
-		(try_begin),
-			#Always can jump to guild master in cheat mode.
-			(eq, "$cheat_mode", 1),
-			(assign, ":can_meet_guild_master", 1),
-		(else_try),
-			#SB : can jump when part of faction
-			(eq, "$players_kingdom", "$g_encountered_party_faction"),
-			(assign, ":can_meet_guild_master", 1),
-		(else_try),
-			#Can jump to guild master after meeting him once.
-			(party_get_slot, ":guild_master_troop", "$current_town",slot_town_elder),
-			(ge, ":guild_master_troop", 1),
-			(neg|troop_slot_eq, ":guild_master_troop", slot_troop_met, 0),
-			(assign, ":can_meet_guild_master", 1),
-		(else_try),
-			#Always enable this in Praven for the sake of playability, since
-			#the guild master there is weirdly hard to find.
-			(this_or_next|eq, "$current_town", "p_town_6"),
-			#Also enable in the starting town, to avoid confusing players into
-			#thinking the menu item doesn't exist.
-			(eq, "$g_starting_town", "$current_town"),
-			(assign, ":can_meet_guild_master", 1),
-		(try_end),
-		(neq, ":can_meet_guild_master", 0),
-		##nested diplomacy end+
         (this_or_next|eq,"$entry_to_town_forbidden",0),
-        (gt, "$sneaked_into_town", disguise_none),
+        (eq, "$sneaked_into_town",1),
 		],
        "Meet the Guild Master.",
-        [
-          (try_begin),
-            (call_script, "script_cf_enter_center_location_bandit_check"),
-          (else_try), #SB : unified script call
-            (call_script, "script_start_town_conversation", slot_town_elder, 11),
-           # (party_get_slot, ":town_scene", "$current_town", slot_town_center),
-           # (modify_visitors_at_site, ":town_scene"),
-           # (reset_visitors),
-
-           # (party_get_slot, ":guild_master_troop", "$current_town",slot_town_elder),
-           # (set_visitor,11,":guild_master_troop"),
-
-           # (set_jump_mission,"mt_town_center"),
-           # (jump_to_scene, ":town_scene"),
-           # (change_screen_map_conversation, ":guild_master_troop"),
-          (try_end),
-     ]),
-	##nested diplomacy start+
-	#If you can't jump to the guild master, explain why
-    ("dplmc_guild_master_meeting_denied",
-	[
-		#Only show this when the player would get the rest of the town menu
-		(party_slot_eq,"$current_town",slot_party_type, spt_town),
-		(this_or_next|eq,"$entry_to_town_forbidden",0),
-        (gt, "$sneaked_into_town", disguise_none),
-	    #There is a valid guild master, and you haven't met him,
-		#and there isn't another condition that enables the jump.
-		(party_get_slot, ":guild_master_troop", "$current_town",slot_town_elder),
-		(gt, ":guild_master_troop", 0),
-		(eq, "$cheat_mode", 0),
-		(neq, "$g_starting_town", "$current_town"),
-		(neq, "$current_town", "p_town_6"),
-		(troop_slot_eq, ":guild_master_troop", slot_troop_met, 0),
-		(neq, "$players_kingdom", "$g_encountered_party_faction"),
-		(disable_menu_option),
-		],
-       "You have not met the Guild Master yet.",
        [
+         (try_begin),
+           (call_script, "script_cf_enter_center_location_bandit_check"),
+         (else_try),
+           (party_get_slot, ":town_scene", "$current_town", slot_town_center),
+           (modify_visitors_at_site, ":town_scene"),
+           (reset_visitors),
+
+           (party_get_slot, ":guild_master_troop", "$current_town",slot_town_elder),
+           (set_visitor,11,":guild_master_troop"),
+
+           (set_jump_mission,"mt_town_center"),
+           (jump_to_scene, ":town_scene"),
+           (change_screen_map_conversation, ":guild_master_troop"),
+         (try_end),
      ]),
-	 ##nested diplomacy end+
-	  ##diplomacy end
+	  ##GUILD MASTER END
       ("town_leave",[],"Leave...",
       [
         (assign, "$g_permitted_to_center",0),
@@ -13015,10 +12906,12 @@ TOTAL:  {reg5}"),
     "none",
     [
         (str_store_party_name, s3, "$current_town"),
-        (call_script, "script_change_troop_renown", "trp_player", 20),
-        (call_script, "script_change_player_relation_with_center", "$current_town", 1),
-        (assign, reg9, 200),
-        (add_xp_to_troop, 250, "trp_player"),
+##++START-VEXED++##
+        (call_script, "script_change_troop_renown", "trp_player", 50),
+        (call_script, "script_change_player_relation_with_center", "$current_town", 15),
+        (assign, reg9, 10000),
+        (add_xp_to_troop, 10000, "trp_player"),
+##++END-VEXED++##
         (troop_add_gold, "trp_player", reg9),
         (str_clear, s8),
         (store_add, ":total_win", "$g_tournament_bet_placed", "$g_tournament_bet_win_amount"),
@@ -13363,44 +13256,46 @@ TOTAL:  {reg5}"),
       (assign, reg6, ":min_dif_divisor"),
       ],
     [
+##++START-VEXED++##
       ("bet_100_denars", [(store_troop_gold, ":gold", "trp_player"),
-                          (ge, ":gold", 100)
+                          (ge, ":gold", 500)
                           ],
-       "100 denars.",
+       "500 denars.",
        [
-         (assign, "$temp", 100),
+         (assign, "$temp", 500),
          (jump_to_menu, "mnu_tournament_bet_confirm"),
         ]),
       ("bet_50_denars", [(store_troop_gold, ":gold", "trp_player"),
-                         (ge, ":gold", 50)
+                         (ge, ":gold", 400)
                          ],
-       "50 denars.",
+       "400 denars.",
        [
-         (assign, "$temp", 50),
+         (assign, "$temp", 400),
          (jump_to_menu, "mnu_tournament_bet_confirm"),
         ]),
       ("bet_20_denars", [(store_troop_gold, ":gold", "trp_player"),
-                         (ge, ":gold", 20)
+                         (ge, ":gold", 300)
                          ],
-       "20 denars.",
+       "300 denars.",
        [
-         (assign, "$temp", 20),
+         (assign, "$temp", 300),
          (jump_to_menu, "mnu_tournament_bet_confirm"),
         ]),
       ("bet_10_denars", [(store_troop_gold, ":gold", "trp_player"),
-                         (ge, ":gold", 10)
+                         (ge, ":gold", 200)
                          ],
-       "10 denars.",
+       "200 denars.",
        [
-         (assign, "$temp", 10),
+         (assign, "$temp", 200),
          (jump_to_menu, "mnu_tournament_bet_confirm"),
         ]),
       ("bet_5_denars", [(store_troop_gold, ":gold", "trp_player"),
-                        (ge, ":gold", 5)
+                        (ge, ":gold", 100)
                         ],
-       "5 denars.",
+       "100 denars.",
        [
-         (assign, "$temp", 5),
+         (assign, "$temp", 100),
+##++END-VEXED++##
          (jump_to_menu, "mnu_tournament_bet_confirm"),
         ]),
       ("go_back_dot", [], "Go back.",
@@ -13418,7 +13313,9 @@ TOTAL:  {reg5}"),
       (call_script, "script_get_win_amount_for_tournament_bet"),
       (assign, ":win_amount", reg0),
       (val_mul, ":win_amount", "$temp"),
-      (val_div, ":win_amount", 100),
+##++START-VEXED++##
+      (val_div, ":win_amount", 500),
+##++END-VEXED++##
       (assign, reg1, "$temp"),
       (assign, reg2, ":win_amount"),
       ],
@@ -13921,7 +13818,9 @@ TOTAL:  {reg5}"),
                                                                        ]),
       ("village_bandits_defeated_cont",[],  "Refuse, stating that they need these items more than you do.",[
       (call_script, "script_change_player_relation_with_center", "$g_encountered_party", 3),
-      (call_script, "script_change_player_honor", 1),
+##++START-VEXED++##
+      (call_script, "script_change_player_honor", 4),
+##++END-VEXED++##
       (change_screen_map)]),
     ],
   ),
@@ -18003,17 +17902,21 @@ goods, and books will never be sold. ^^You can change some settings here freely.
     ],
     [
     #SB : skip quest
-      ("skip_quest",[], "Take a nice long walk around {s1}...",
+      ("skip_quest",[], "[Skip Tutorial] Take a nice long walk around {s1}...",
        [
         (assign, "$g_starting_town", -1), #this disables the startup merchant from taverns
         #let triggers load first
         (rest_for_hours, 3, 5, 0),
+##++START-VEXED++##
+##Mmmmmm monies!
+	(troop_add_gold, "trp_player", 5000),
+##++END-VEXED++##
         (assign, "$auto_enter_town", "$current_town"),
         # (start_encounter, "$current_town"),
         (change_screen_return),
        ]),
 
-      ("continue",[], "Go find an inn...",
+      ("continue",[], "[Tutorial] Go find an inn...",
        [
         (jump_to_menu, "mnu_start_phase_3"),
        ]),

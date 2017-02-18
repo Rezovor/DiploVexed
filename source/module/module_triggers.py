@@ -1196,41 +1196,36 @@ triggers = [
        (val_div,"$debt_to_merchants_guild",100)
     ]
    ),
+   ##VEXED CARAVAN
    #SB : deprecate these triggers, set party order directly
 # Escort merchant caravan:
-  (1, 0.0, ti_once, [
-                   # (check_quest_active, "qst_escort_merchant_caravan"),
-                   # (eq, "$escort_merchant_caravan_mode", 1)
+  (0.1, 0.0, 0.1, [(check_quest_active, "qst_escort_merchant_caravan"),
+                    (eq, "$escort_merchant_caravan_mode", 1)
                    ],
-                  [
-                   # (quest_get_slot, ":quest_target_party", "qst_escort_merchant_caravan", slot_quest_target_party),
-                   # (try_begin),
-                     # (party_is_active, ":quest_target_party"),
-                     # (party_set_ai_behavior, ":quest_target_party", ai_bhvr_hold),
-                     # (party_set_flags, ":quest_target_party", pf_default_behavior, 0),
-                   # (try_end),
+                  [(quest_get_slot, ":quest_target_party", "qst_escort_merchant_caravan", slot_quest_target_party),
+                    (try_begin),
+                      (party_is_active, ":quest_target_party"),
+                      (party_set_ai_behavior, ":quest_target_party", ai_bhvr_hold),
+                     (party_set_flags, ":quest_target_party", pf_default_behavior, 0),
+                    (try_end),
                    ]),
-  (1, 0.0, ti_once, [
-                    # (check_quest_active, "qst_escort_merchant_caravan"),
-                    # (eq, "$escort_merchant_caravan_mode", 0),
+  (0.1, 0.0, 0.1, [(check_quest_active, "qst_escort_merchant_caravan"),
+                     (eq, "$escort_merchant_caravan_mode", 0),
                     ],
-                   [
-                    # (quest_get_slot, ":quest_target_party", "qst_escort_merchant_caravan", slot_quest_target_party),
-                    # (try_begin),
-                      # (party_is_active, ":quest_target_party"),
-                      # (party_set_ai_behavior, ":quest_target_party", ai_bhvr_escort_party),
-                      # (party_set_flags, ":quest_target_party", pf_default_behavior, 0),
-                      # (party_set_ai_object, ":quest_target_party", "p_main_party"),
-                    # (try_end),
+                   [(quest_get_slot, ":quest_target_party", "qst_escort_merchant_caravan", slot_quest_target_party),
+                     (try_begin),
+                       (party_is_active, ":quest_target_party"),
+                       (party_set_ai_behavior, ":quest_target_party", ai_bhvr_escort_party),
+                       (party_set_flags, ":quest_target_party", pf_default_behavior, 0),
+                       (party_set_ai_object, ":quest_target_party", "p_main_party"),
+                     (try_end),
                     ]),
 
-  (0.3, 0, 1.1, [
-                 (check_quest_active, "qst_escort_merchant_caravan"),
+  (0.1, 0, 0.0, [(check_quest_active, "qst_escort_merchant_caravan"),
                  (quest_get_slot, ":quest_target_party", "qst_escort_merchant_caravan", slot_quest_target_party),
                  (neg|party_is_active,":quest_target_party"),
                 ],
-                [
-                 (call_script, "script_abort_quest", "qst_escort_merchant_caravan", 2),
+                [(call_script, "script_abort_quest", "qst_escort_merchant_caravan", 2),
                 ]),
 
 # Troublesome bandits
@@ -1287,12 +1282,13 @@ triggers = [
             (le, ":relation", 0), #fail if nothing qualifies
 
             (troop_set_slot, ":pretender", slot_troop_cur_center, ":town"),
-            (try_begin),
+            (try_begin), #SB : cheat mode
               (eq, "$cheat_mode", 1),
-              (str_store_troop_name, 4, ":pretender"),
-              (str_store_party_name, 5, ":town"),
+              (str_store_troop_name_link, 4, ":pretender"),
+              (str_store_party_name_link, 5, ":town"),
               (display_message, "@{!}{s4} is in {s5}"),
             (try_end),
+            #SB TODO : slowly add renown scaling (other than tournament wins), equipment shopping in old center
           (try_end),
 
 #        (try_for_range, ":rebel_faction", rebel_factions_begin, rebel_factions_end),
@@ -1324,15 +1320,14 @@ triggers = [
 
 ##++START-VEXED++##
 #Process morale and determine personality clashes
-  (0, 0, 900,
+  (0, 0, 24,
    [],
 [
 
 #Count NPCs in party and get the "grievance divisor", which determines how fast grievances go away
 #Set their relation to the player
         (assign, ":npcs_in_party", 0),
-        (assign, ":grievance_divisor", 500),
-##++END-VEXED++##
+        (assign, ":grievance_divisor", 100),
         (try_for_range, ":npc1", companions_begin, companions_end),
             (main_party_has_troop, ":npc1"),
             (val_add, ":npcs_in_party", 1),
@@ -1425,14 +1420,12 @@ triggers = [
 ##++START-VEXED++##
 				#Reduce grievance over time (or augment, if party is overcrowded
                 (troop_get_slot, ":grievance", ":npc", slot_troop_personalityclash_penalties),
-                (val_mul, ":grievance", 500),
+                (val_mul, ":grievance", 90),
                 (val_div, ":grievance", ":grievance_divisor"),
                 (troop_set_slot, ":npc", slot_troop_personalityclash_penalties, ":grievance"),
 
                 (troop_get_slot, ":grievance", ":npc", slot_troop_morality_penalties),
-                (val_mul, ":grievance", 500),
-##++END-VEXED++##
-
+                (val_mul, ":grievance", 90),
                 (val_div, ":grievance", ":grievance_divisor"),
                 (troop_set_slot, ":npc", slot_troop_morality_penalties, ":grievance"),
 
@@ -1508,7 +1501,7 @@ triggers = [
 				##diplomacy begin
                 (else_try),
                   (this_or_next|troop_slot_eq, ":npc", slot_troop_current_mission, dplmc_npc_mission_spy_request), #spy mission
-                  (troop_slot_eq, ":npc", slot_troop_current_mission, dplmc_npc_mission_rescue_prisoner), #SB : escue mission
+                  (troop_slot_eq, ":npc", slot_troop_current_mission, dplmc_npc_mission_rescue_prisoner), #SB : rescue mission
                   (troop_slot_ge, ":npc", dplmc_slot_troop_mission_diplomacy, 1), #caught
 
                   (try_begin), #use hired blade for spy
@@ -1529,7 +1522,7 @@ triggers = [
 
 					#If the hero can join
 					(this_or_next|neg|troop_slot_eq, ":npc", slot_troop_current_mission, npc_mission_rejoin_when_possible),
-					(hero_can_join, ":npc"),
+					(hero_can_join, "p_main_party"), #SB : fix this stupid bug
 
 					(assign, "$npc_to_rejoin_party", ":npc"),
 				(try_end),

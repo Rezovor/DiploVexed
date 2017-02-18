@@ -113,7 +113,7 @@ party_templates = [
   # high-modernised templates are generally includes 3-5 troops in total
 
 ##++START-VEXED++##
-  ("kingdom_1_reinforcements_a", "{!}kingdom_1_reinforcements_a", 0, 0, fac_commoners, 0, [(trp_swadian_recruit,8,115),(trp_swadian_militia,8,15)]),
+  ("kingdom_1_reinforcements_a", "{!}kingdom_1_reinforcements_a", 0, 0, fac_commoners, 0, [(trp_swadian_recruit,8,15),(trp_swadian_militia,8,15)]),
   ("kingdom_1_reinforcements_b", "{!}kingdom_1_reinforcements_b", 0, 0, fac_commoners, 0, [(trp_swadian_footman,8,15),(trp_swadian_skirmisher,8,15)]),
   ("kingdom_1_reinforcements_c", "{!}kingdom_1_reinforcements_c", 0, 0, fac_commoners, 0, [(trp_swadian_man_at_arms,8,15),(trp_swadian_crossbowman,8,15)]), #Swadians are a bit less-powered thats why they have a bit more troops in their modernised party template (3-6, others 3-5)
 

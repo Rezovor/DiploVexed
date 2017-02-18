@@ -46,6 +46,7 @@ bard_disguise = [itm_leather_boots,itm_lyre,itm_linen_tunic,itm_winged_mace]
 
 af_castle_lord = af_override_horse | af_override_weapons| af_require_civilian
 
+
 ##diplomacy begin
 dplmc_horse_cull = [
     #sets up the spawn timer
@@ -87,7 +88,7 @@ dplmc_horse_cull = [
         # (display_message, "@{s1} mounted {s2}"),
       ]),
     #the main "workhorse" of the trigger, set to intervals of 5/10/30 or have a server setting
-    (10, 0, 0, [(this_or_next|multiplayer_is_server),(neg|game_in_multiplayer_mode)],
+    (10, 0, 0, [(this_or_next|multiplayer_is_server),(neg|game_in_multiplayer_mode),(eq, "$g_dplmc_horse_speed", 0),],
       [
         (set_fixed_point_multiplier, 1000),
         (try_for_agents, ":horse_no"),
@@ -120,6 +121,10 @@ dplmc_horse_cull = [
           (else_try),
             (val_sub, ":horse_timer", 30),
             (agent_set_slot, ":horse_no", slot_agent_bought_horse, ":horse_timer"),
+            (try_begin), #force runaway half-way through
+              (le, ":horse_timer", -60),
+              (agent_start_running_away, ":horse_no"),
+            (try_end),
           (try_end),
         (try_end),
       ]),
@@ -650,6 +655,7 @@ dplmc_battle_mode_triggers = [
   ]
 ##diplomacy end
 
+
 multiplayer_server_check_belfry_movement = (
   0, 0, 0, [],
   [
@@ -955,6 +961,7 @@ multiplayer_server_check_belfry_movement = (
       (try_end),
     (try_end),
     ])
+
 
 multiplayer_server_spawn_bots = (
   0, 0, 0, [],
@@ -1953,7 +1960,8 @@ tournament_triggers = [
        (val_sub, "$g_arena_training_next_spawn_time", ":time_reduction"),
        ]),
 
-  (0, 0, 0,
+  #SB : change interval
+  (3, 0, 0,
    [
        (eq, "$g_mt_mode", abm_training),
        ],
@@ -3155,6 +3163,7 @@ mission_templates = [
      (4,mtef_attackers|mtef_team_1,0,aif_start_alarmed,12,[]),
      (4,mtef_attackers|mtef_team_1,0,aif_start_alarmed,0,[]),
      ],
+
     [
       (ti_on_agent_spawn, 0, 0, [],
        [
@@ -3373,7 +3382,7 @@ mission_templates = [
 
     ]
     ##diplomacy begin
-    + dplmc_battle_mode_triggers,
+    + dplmc_battle_mode_triggers + dplmc_horse_cull,  #SB : horse cull
     ##diplomacy end
   ),
 
@@ -3447,7 +3456,7 @@ mission_templates = [
 
     ]
     ##diplomacy begin
-    + dplmc_battle_mode_triggers,
+    + dplmc_battle_mode_triggers + dplmc_horse_cull,  #SB : horse cull
     ##diplomacy end
   ),
 
@@ -3596,7 +3605,7 @@ mission_templates = [
 ##          ], []),
     ]
     ##diplomacy begin
-    + dplmc_battle_mode_triggers,
+    + dplmc_battle_mode_triggers + dplmc_horse_cull, #SB : horse cull
     ##diplomacy end
   ),
 
@@ -5161,11 +5170,12 @@ mission_templates = [
        [(finish_mission,0)]),
     ],
   ),
-
+  
   (
     "arena_melee_fight",mtf_arena_fight,-1,
     "You enter a melee fight in the arena.",
     [
+	
       (0,mtef_visitor_source|mtef_team_0,af_override_all,aif_start_alarmed,1,[itm_practice_bow,itm_practice_arrows,itm_practice_horse,itm_arena_tunic_red, itm_red_tourney_helmet]),
       (1,mtef_visitor_source|mtef_team_0,af_override_all,aif_start_alarmed,1,[itm_heavy_practice_sword, itm_arena_tunic_red]),
       (2,mtef_visitor_source|mtef_team_0,af_override_all,aif_start_alarmed,1,[itm_heavy_practice_sword,itm_practice_horse,itm_arena_tunic_red, itm_red_tourney_helmet]),
@@ -5210,7 +5220,19 @@ mission_templates = [
       (37,mtef_visitor_source|mtef_team_2,af_override_all,aif_start_alarmed,1,[itm_practice_sword, itm_practice_shield]),
       (38,mtef_visitor_source|mtef_team_3,af_override_all,aif_start_alarmed,1,[itm_heavy_practice_sword]),
       (39,mtef_visitor_source|mtef_team_4,af_override_all,aif_start_alarmed,1,[itm_practice_staff]),
-#40-49 not used yet
+#40-40 VEXED
+      (40,mtef_visitor_source|mtef_team_1,af_override_all,aif_start_alarmed,1,[itm_arena_lance,itm_practice_shield]),
+      (41,mtef_visitor_source|mtef_team_1,af_override_all,aif_start_alarmed,1,[itm_practice_crossbow,itm_practice_bolts]),
+      (42,mtef_visitor_source|mtef_team_1,af_override_all,aif_start_alarmed,1,[itm_practice_javelin,itm_practice_javelin_melee]),
+	  (43,mtef_visitor_source|mtef_team_1,af_override_all,aif_start_alarmed,1,[itm_sledgehammer]),
+	  (44,mtef_visitor_source|mtef_team_1,af_override_all,aif_start_alarmed,1,[itm_two_handed_cleaver]),
+	  (45,mtef_visitor_source|mtef_team_1,af_override_all,aif_start_alarmed,1,[itm_stones,itm_practice_dagger,itm_practice_shield]),
+	  (46,mtef_visitor_source|mtef_team_1,af_override_all,aif_start_alarmed,1,[itm_wooden_stick,itm_practice_shield]),
+	  (47,mtef_visitor_source|mtef_team_1,af_override_all,aif_start_alarmed,1,[itm_heavy_throwing_axes,itm_practice_dagger,itm_practice_shield]),
+	  (48,mtef_visitor_source|mtef_team_1,af_override_all,aif_start_alarmed,1,[itm_shortened_military_scythe]),
+	  (49,mtef_visitor_source|mtef_team_1,af_override_all,aif_start_alarmed,1,[itm_club_with_spike_head,itm_practice_shield]),
+	  ##
+	  
       (24,mtef_visitor_source|mtef_team_3,af_override_all,aif_start_alarmed,1,[itm_practice_bow,itm_practice_arrows,itm_practice_horse,itm_arena_tunic_yellow, itm_gold_tourney_helmet]),
       (24,mtef_visitor_source|mtef_team_3,af_override_all,aif_start_alarmed,1,[itm_heavy_practice_sword,itm_arena_tunic_yellow, itm_gold_tourney_helmet]),
       (24,mtef_visitor_source|mtef_team_3,af_override_all,aif_start_alarmed,1,[itm_heavy_practice_sword,itm_practice_horse,itm_arena_tunic_yellow, itm_gold_tourney_helmet]),
@@ -5231,6 +5253,7 @@ mission_templates = [
 
       (56, mtef_visitor_source|mtef_team_0, af_override_all, aif_start_alarmed, 1, [itm_practice_sword, itm_practice_shield, itm_padded_cloth, itm_segmented_helmet]),
       (57, mtef_visitor_source|mtef_team_0, af_override_all, aif_start_alarmed, 1, [itm_practice_sword, itm_practice_shield, itm_padded_cloth, itm_segmented_helmet]),
+	  
     ],
     tournament_triggers
   ),
@@ -15056,7 +15079,6 @@ mission_templates = [
             
             
 			(call_script, "script_multiplayer_server_on_agent_killed_or_wounded_common", ":dead_agent_no", ":killer_agent_no"),
-			
 			(agent_get_team, ":dead_agent_team", ":dead_agent_no"),
             
             #Frank 
@@ -15985,7 +16007,7 @@ mission_templates = [
 
 		]),
         
-	] + dplmc_horse_cull
+	]
    ),
   
   

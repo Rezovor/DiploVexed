@@ -1654,8 +1654,8 @@ village_elder_quests_end_2   = "qst_blank_quest_6"
 mayor_quests_begin  = "qst_move_cattle_herd"
 mayor_quests_end    = village_elder_quests_begin
 
-mayor_quests_begin_2 = "qst_blank_quest_11"
-mayor_quests_end_2   = "qst_blank_quest_11"
+mayor_quests_begin_2 = "qst_escort_merchant_caravan"
+mayor_quests_end_2   = village_elder_quests_begin
 
 lady_quests_begin = "qst_rescue_lord_by_replace"
 lady_quests_end   = mayor_quests_begin
@@ -2128,18 +2128,18 @@ dplmc_npc_mission_trade_request               = 17
 dplmc_npc_mission_nonaggression_request       = 18
 dplmc_npc_mission_persuasion                  = 19
 dplmc_npc_mission_rescue_prisoner             = 20 #SB : added for quest, using slot_troop_town_with_contacts
-dplmc_slot_troop_mission_diplomacy            = 162
-dplmc_slot_troop_mission_diplomacy2           = 163
-dplmc_slot_troop_political_stance             = 164 #dplmc+ deprecated, see note below
+dplmc_slot_troop_mission_diplomacy            = 362
+dplmc_slot_troop_mission_diplomacy2           = 363
+dplmc_slot_troop_political_stance             = 366 #dplmc+ deprecated, see note below
 ##diplomacy start+
 #Though you may assume otherwise from the name,  dplmc_slot_troop_political_stance is
 #actually used as a temporary slot (it's overwritten every time you start a conversation
 #with your chancellor about who supports whom, and in Diplomacy 3.3.2 it isn't used
 #elsewhere).
 #   I'm giving it a new name to reflect its use, to avoid confusion.
-dplmc_slot_troop_temp_slot                    = 164 #replaces dplmc_slot_troop_political_stance
+dplmc_slot_troop_temp_slot                    = 364 #replaces dplmc_slot_troop_political_stance
 ##diplomacy end+
-dplmc_slot_troop_affiliated                   = 165 ##notes: 0 is default, 1 is asked; on newer games 3 is affiliated and 4 is betrayed
+dplmc_slot_troop_affiliated                   = 365 ##notes: 0 is default, 1 is asked; on newer games 3 is affiliated and 4 is betrayed
 dplmc_slot_party_mission_diplomacy            = 300
 dplmc_slot_center_taxation                    = 400
 ##diplomacy start+ additional center slots
@@ -2437,6 +2437,22 @@ DPLMC_CURRENT_VERSION_CODE = 170001
 DPLMC_VERSION_LOW_7_BITS = 68 #Number that comes after the rest of the version code
 
 DPLMC_DIPLOMACY_VERSION_STRING = "4.3+ for Steam"
+
+#VEXED ARENA WEAPONS
+vexed_arena_weapon1 = 1
+vexed_arena_weapon2 = 2
+vexed_arena_weapon3 = 3
+vexed_arena_weapon4 = 4
+vexed_arena_weapon5 = 5
+vexed_arena_weapon6 = 6
+vexed_arena_weapon7 = 7
+vexed_arena_weapon8 = 8
+vexed_arena_weapon9 = 9
+vexed_arena_weapon10 = 10
+vexed_arena_weapon11 = 11
+vexed_arena_weapon12 = 12
+vexed_arena_weapon13 = 13
+vexed_arena_weapon14 = 14
 
 # #Perform a check to make sure constants are defined in a reasonable way.
 # def _validate_constants(verbose=False):

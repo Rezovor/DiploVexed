@@ -12,6 +12,7 @@ from header_terrain_types import *
 from header_music import *
 from header_map_icons import *
 from ID_animations import *
+from compiler import *
 ##diplomacy start+
 from module_factions import dplmc_factions_begin, dplmc_factions_end, dplmc_non_generic_factions_begin
 ##diplomacy end+
@@ -5402,10 +5403,10 @@ scripts = [
       (assign, ":troop_no", "trp_player"),
 
 ##++START-VEXED++##
-      (assign, ":limit", 100),
+      (assign, ":limit", 100),#100
       (store_skill_level, ":skill", "skl_leadership", ":troop_no"),
       (store_attribute_level, ":charisma", ":troop_no", ca_charisma),
-      (val_mul, ":skill", 100),
+      (val_mul, ":skill", 100), #100
       (val_add, ":limit", ":skill"),
       (val_add, ":limit", ":charisma"),
 
@@ -15018,7 +15019,7 @@ scripts = [
         (party_stack_get_troop_id, ":party_leader", ":party_no", 0),
         (store_faction_of_party, ":faction_id", ":party_no"),
 
-        #default limit is 10 for kingdom lords
+        #default limit is 10 for kingdom lords 
         (assign, ":limit", 30),
 
         #each (leadership level) gives 5 to limit
@@ -15150,7 +15151,7 @@ scripts = [
       (store_add, ":level_factor", 80, ":level"),
       (val_mul, ":limit", ":level_factor"),
 ##++START-VEXED++##
-      (val_div, ":limit", 60),
+      (val_div, ":limit", 60), #60
       (assign, reg0, ":limit"),
 ##++END-VEXED++##
   ]),
@@ -15434,6 +15435,7 @@ scripts = [
         (try_end),
       (try_end),
     (else_try),
+	#vexedlook1 -- this is all diplomacy
       (eq, ":button_value", cmenu_detach),
       (party_get_num_attached_parties, ":num_stacks", ":party_no"),
       (try_for_range_backwards, ":stacks", 0, ":num_stacks"),
@@ -20077,7 +20079,7 @@ scripts = [
 	          (val_mul, ":quest_gold_reward", 25),
 	          (val_div, ":quest_gold_reward", 20),
 	          (store_random_in_range, ":quest_target_amount", 6, 12),
-	          # (assign, "$escort_merchant_caravan_mode", 0), #SB : useless global, use quest slots if necessary
+	          (assign, "$escort_merchant_caravan_mode", 0), #SB : useless global, use quest slots if necessary
 	          (assign, ":result", ":quest_no"),
 	        (else_try),
               (eq, ":quest_no", "qst_deliver_wine"),
@@ -32358,8 +32360,6 @@ scripts = [
         (eq, ":quest_no", "qst_hunt_down_fugitive"),
         (assign, ":quest_return_penalty", -3),
         (assign, ":quest_expire_penalty", -4),
-        #SB : remove prisoner if player kept it intentionally
-        (party_remove_prisoners, "p_main_party", "trp_fugitive", 1),
       (else_try),
         (eq, ":quest_no", "qst_kill_local_merchant"),
       (else_try),
@@ -38018,7 +38018,7 @@ slot_center_mercenary_troop_type, ":troop_no"),
          (try_begin),
            (check_quest_active, "qst_collect_taxes"),
            (quest_slot_eq, "qst_collect_taxes", slot_quest_target_center, ":village_no"),
-           (assign, ":random_no", 100),
+           (assign, ":continue", 0),
          (else_try),
            (check_quest_active, "qst_train_peasants_against_bandits"),
            (quest_slot_eq, "qst_train_peasants_against_bandits", slot_quest_target_center, ":village_no"),
@@ -66726,7 +66726,7 @@ Days since last meeting: {reg49}^^Poems:^  {reg50?{s50}:no poem heard}"),
                 (str_store_faction_name, s48, ":party_faction"),
             (try_end),
 
-            # Days since last meeting
+            # Days since last meeting ##VEXED LOOK
             (store_current_hours, ":hours_since_last_visit"),
             (troop_get_slot, ":last_visit_hour", ":troop_no", slot_troop_last_talk_time),
             (val_sub, ":hours_since_last_visit", ":last_visit_hour"),
@@ -71896,7 +71896,7 @@ Born at {s43}^Contact in {s44} of the {s45}.^\
    #SB : new features
    (try_begin),
       (is_between, ":diplomacy_version_code", 0, 170001), #1.171 invasion patch
-      (display_log_message, "@Performing 2017 updates, thank you for your patience!", message_positive),
+      #(display_log_message, "@Performing 2017 updates, thank you for your patience!", message_positive),
       #set up camera keys
       (call_script, "script_setup_camera_keys"),
 
@@ -72188,4 +72188,5 @@ Born at {s43}^Contact in {s44} of the {s45}.^\
    (assign, reg0, ":save_reg0"),#Revert register
 
    ]),
+
 ]

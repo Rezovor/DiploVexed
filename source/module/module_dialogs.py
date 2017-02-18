@@ -1772,42 +1772,161 @@ or you won't be able to hang on to a single man you catch.", "ramun_ask_about_ca
 
   #SB : quickbuy troops cheat
   [anyone|plyr,"tavernkeeper_talk", [(ge, "$cheat_mode", 1)], "CHEAT: So I heard you had troops.", "ramun_buy",[]],
-  [anyone,"ramun_buy", [], "Of course. What kind would you like?", "ramun_faction",[]],
-  [anyone|repeat_for_factions|plyr,"ramun_faction",
-    [  (store_repeat_object, ":faction_no"),
-       (this_or_next|is_between, ":faction_no", npc_kingdoms_begin, kingdoms_end),
-       (this_or_next|is_between, ":faction_no", "fac_commoners", "fac_neutral"),
-       (is_between, ":faction_no", "fac_manhunters", "fac_mountain_bandits"),
-       #(assign, reg1, ":faction_no"),
-        (try_begin),
-            (is_between, ":faction_no", npc_kingdoms_begin, kingdoms_end),
-            (faction_get_slot, ":str", ":faction_no", slot_faction_adjective),
-            (str_store_string, s1, ":str"),
-            # (store_sub, ":faction_adj", ":faction_no", kingdoms_begin),
-            # (val_add, ":faction_adj", "str_kingdoms_adjectives"),
-            # (str_store_string, s1, ":faction_adj"),
-        (else_try), #fallback
-            (str_store_faction_name, s1, ":faction_no"),
-        (try_end),
-    ], "Some {s1} please.", "ramun_select",
-    [(store_repeat_object, "$diplomacy_var"),(str_store_faction_name, s1, "$diplomacy_var"),]
-    ],
-  [anyone|plyr,"ramun_faction",[], "Nevermind.", "close_window", []],
+##VEXED BUY TROOPS ((OP Malik))
+[anyone,"ramun_buy", [], "Of course. What kind would you like?", "ramun_faction",[]],
 
-  [anyone,"ramun_select", [], "So you want some troops from the {s1}?", "ramun_troops",[]],
+ [anyone|repeat_for_factions|plyr,"ramun_faction",
+   [  (store_repeat_object, ":faction_no"),
+      (this_or_next|is_between, ":faction_no", kingdoms_begin, kingdoms_end),
+      (this_or_next|is_between, ":faction_no", "fac_commoners", "fac_neutral"),
+      (is_between, ":faction_no", "fac_manhunters", "fac_mountain_bandits"),
+      #(assign, reg1, ":faction_no"),
+      (try_begin),
+         (is_between, ":faction_no", npc_kingdoms_begin, kingdoms_end),
+         (faction_get_slot, ":str", ":faction_no", slot_faction_adjective),
+         (str_store_string, s2, ":str"),
+      (else_try),
+         (str_store_faction_name, s2, ":faction_no"),
+      (try_end),
+   ], "Some {s2} please.", "ramun_select",
+   [(store_repeat_object, reg2),(str_store_faction_name, s2, reg2),]
+   ],
 
+  [anyone|plyr,"ramun_faction",[], "Nevermind.", "tavernkeeper_pretalk", []],
+ 
+  [anyone,"ramun_select", [], "So you want some troops from the {s2}?", "ramun_troops",[]],
+ 
   [anyone|repeat_for_troops|plyr,"ramun_troops",
-    [
-        (store_repeat_object, ":troop"),
-        (is_between, ":troop", regular_troops_begin, "trp_kidnapped_girl"),#eliminates a load
-        (store_faction_of_troop, ":faction", ":troop"),#eliminates the rest
-        (eq, ":faction", "$diplomacy_var"),#by faction obviously
-        (neg|troop_is_hero, ":troop"),#patrol leaders
-        (str_store_troop_name_plural, s2, ":troop"),
-        # (assign, reg2, ":troop"),
-    ],
-    "{s2}", "ramun_select", [(store_repeat_object, ":troop"),(party_add_members, "p_main_party", ":troop", 5)]],
-  [anyone|plyr,"ramun_troops",[], "Let's try some other kind of grunts.", "ramun_buy", []],
+   [
+      (store_repeat_object, ":troop"),
+      (is_between, ":troop", regular_troops_begin, "trp_kidnapped_girl"),#eliminates a load
+      (store_faction_of_troop, ":faction", ":troop"),#eliminates the rest
+      (eq, ":faction", reg2),#by faction obviously
+      (neg|troop_is_hero, ":troop"),#patrol leaders
+      (str_store_troop_name, s3, ":troop"),
+      (assign,"$stroop",0), 
+	  (assign, reg7, 0),
+	  (assign, reg8, 0),
+      (assign, reg9, 0),	  
+   ],
+   "{s3}", "ramun_count", [(store_repeat_object,reg3),(str_store_faction_name, s3, reg2),(str_store_troop_name_plural,s4,reg3),(assign,"$stroop",reg3),]],
+ 
+  [anyone|plyr,"ramun_troops",[],"No, none of these.  Let me see that faction list again.","ramun_buy",[]],   
+   
+   [anyone,"ramun_count",[],"How many {s4}?","ramun_crespond",[]],
+   
+   [anyone|plyr,"ramun_crespond",[],"I shall return when I'm better prepared.","tavernkeeper_pretalk",[]],
+    [anyone|plyr,"ramun_crespond",
+      [
+         (party_get_free_companions_capacity,":room","p_main_party"),
+         (ge,":room",1),
+         (store_troop_gold,":gold","trp_player"),
+         (call_script,"script_game_get_join_cost",reg3),
+         (store_mul,":cost",reg0,1),
+         (ge,":gold",":cost"),      
+         (assign,reg7,":cost"),		 
+      ],"I'd like one. ({reg7} denars)","ramun_buy_some",[(assign, "$tcost", 1),(assign,reg8,1),(assign,reg9,1)]],
+    [anyone|plyr,"ramun_crespond",
+      [
+         (party_get_free_companions_capacity,":room","p_main_party"),
+         (ge,":room",5),
+         (store_troop_gold,":gold","trp_player"),
+         (call_script,"script_game_get_join_cost",reg3),
+         (store_mul,":cost",reg0,5),
+         (ge,":gold",":cost"),
+         (assign,reg7,":cost"),         
+      ],"I'd like five. ({reg7} denars)","ramun_buy_some",[(assign, "$tcost", 5),(assign,reg8,5),(assign,reg9,5)]],
+
+    [anyone|plyr,"ramun_crespond",
+      [
+         (party_get_free_companions_capacity,":room","p_main_party"),
+         (ge,":room",10),
+         (store_troop_gold,":gold","trp_player"),
+         (call_script,"script_game_get_join_cost",reg3),
+         (store_mul,":cost",reg0,10),
+         (ge,":gold",":cost"),  
+         (assign,reg7,":cost"),		 
+      ],"I'd like ten. ({reg7} denars)","ramun_buy_some",[(assign, "$tcost", 10),(assign,reg8,10),(assign,reg9,10)]],
+    [anyone|plyr,"ramun_crespond",
+      [
+         (party_get_free_companions_capacity,":room","p_main_party"),
+         (ge,":room",20),
+         (store_troop_gold,":gold","trp_player"),
+         (call_script,"script_game_get_join_cost",reg3),
+         (store_mul,":cost",reg0,20),
+         (ge,":gold",":cost"),    
+         (assign,reg7,":cost"),		 
+      ],"I'd like twenty. ({reg7} denars)","ramun_buy_some",[(assign, "$tcost", 20),(assign,reg8,20),(assign,reg9,20)]],
+   
+    [anyone|plyr,"ramun_crespond",
+      [
+         (party_get_free_companions_capacity,":room","p_main_party"),
+         (ge,":room",50),
+         (store_troop_gold,":gold","trp_player"),
+         (call_script,"script_game_get_join_cost",reg3),
+         (store_mul,":cost",reg0,50),       
+         (ge,":gold",":cost"),     
+         (assign,reg7,":cost"),		 
+      ],"I'd like fifty. ({reg7} denars)","ramun_buy_some",[(assign, "$tcost", 50),(assign,reg8,50),(assign,reg9,50)]],
+
+   
+    [anyone|plyr,"ramun_crespond",
+      [
+         (party_get_free_companions_capacity,":room","p_main_party"),
+         (ge,":room",100),
+         (store_troop_gold,":gold","trp_player"),
+         (call_script,"script_game_get_join_cost",reg3),
+         (store_mul,":cost",reg0,100),         
+         (ge,":gold",":cost"),         
+         (assign,reg7,":cost"),
+      ],"I'd like one hundred. ({reg7} denars)","ramun_buy_some",[(assign, "$tcost", 100),(assign,reg8,100),(assign,reg9,100)]],
+
+    [anyone|plyr,"ramun_crespond",
+      [
+         (party_get_free_companions_capacity,":room","p_main_party"),
+         (ge,":room",300),
+         (store_troop_gold,":gold","trp_player"),
+         (call_script,"script_game_get_join_cost",reg3),
+         (store_mul,":cost",reg0,300),         
+         (ge,":gold",":cost"),
+         (assign,reg7,":cost"),         
+      ],"I'd like three hundred. ({reg7} denars)","ramun_buy_300",[(assign, "$tcost", 300), (assign,reg8,300),(assign,reg9,300)]],
+
+    [anyone,"ramun_buy_some",[], "Certainly.", "ramun_anythingelse",
+     [
+      (party_add_members, "p_main_party","$stroop","$tcost"),
+        (call_script,"script_game_get_join_cost",reg3),
+        (val_mul, "$tcost", reg0),
+        (troop_remove_gold, "trp_player", "$tcost"),
+        (val_mul, reg9, reg0),
+	    (display_message, "@You've purchased {reg8} {s4} for {reg9} denars"),
+        (assign, "$tcost", 0),
+     ]
+    ],   
+##Reg 8 = number of troops, s4 = troop name, reg9 = denar cost         
+   [anyone,"ramun_buy_300",[], "What a greedy {fulcher/queine} ye be!  I do this only for thee.", "ramun_anythingelse",
+     [
+      (party_add_members, "p_main_party","$stroop","$tcost"),
+        (call_script,"script_game_get_join_cost",reg3),
+        (val_mul, "$tcost",reg0),
+        (troop_remove_gold, "trp_player", "$tcost"),
+        (val_mul, reg9, reg0),
+	    (display_message, "@You've purchased {reg8} {s4} for {reg9} denars"),
+        (assign, "$tcost", 0),		
+     ]
+   ],   
+   
+   [anyone,"ramun_anythingelse",[],"What else?","ramun_demands",[]],
+   
+   [anyone|plyr,"ramun_demands",[],"No, I'm done as thou hadst served well","tavernkeeper_pretalk",[]],
+   [anyone|plyr,"ramun_demands",[],"Yes, more of the same.","ramun_count",[]],
+   [anyone|plyr,"ramun_demands",[],"I would have another look at the list anew.","ramun_buy",[]],
+
+#   [anyone|plyr,"ramun_troops",[], "Let's try some other kind of grunts.", "ramun_buy", []],
+#giz me troobz end
+#Malik Troop Recruit From Taverns End
+
+
 
 
 
@@ -2647,9 +2766,9 @@ Still I am sorry that I'll leave you soon. You must promise me, you'll come visi
  (assign, "$lord_selected", -1),
  ]],
 
-[anyone,"member_intelgathering_3", [ #change back to member_intelgathering_2 if this will be used
-(eq, 1, 0),
-], "Of course, as few people should know of this as possible. If you want to collect the information, or pull me out, then don't send a messenger. Come and get me yourself -- even if that means you have to sneak through the gates.", "member_intelgathering_3",[]],
+#[anyone,"member_intelgathering_3", [ #change back to member_intelgathering_2 if this will be used
+#(eq, 1, 0),
+#], "Of course, as few people should know of this as possible. If you want to collect the information, or pull me out, then don't send a messenger. #Come and get me yourself -- even if that means you have to sneak through the gates.", "member_intelgathering_3",[]],
 
 [anyone|plyr,"member_intelgathering_3", [
  ], "Splendid idea -- you do that.", "member_intelgathering_4",[]],
@@ -2755,7 +2874,7 @@ Still I am sorry that I'll leave you soon. You must promise me, you'll come visi
  
  #results should really take into account lord's health in a week + slot_town_last_nearby_fire_time
  ]],
- 
+
 [anyone,"member_intelgathering_4", [
  (troop_set_slot, "$g_talk_troop", slot_troop_days_on_mission, 5),
  (troop_set_slot, "$g_talk_troop", slot_troop_current_mission, npc_mission_gather_intel),
@@ -2766,6 +2885,7 @@ Still I am sorry that I'll leave you soon. You must promise me, you'll come visi
  (str_store_string, s21, ":string"),
 
  ], "Good. I should be ready to report in about five days. Farewell then, {s21}, for a little while.", "close_window",[]],
+
 
 
 
@@ -14396,7 +14516,7 @@ What kind of recruits do you want?", "dplmc_constable_recruit_select",
          (try_end),
          ]],
 
-
+##VEXED_DIPLOVEXED
 [anyone, "event_triggered", [
  (store_conversation_troop, "$map_talk_troop"),
  (is_between, "$map_talk_troop", companions_begin, companions_end),
@@ -14441,27 +14561,26 @@ What kind of recruits do you want?", "dplmc_constable_recruit_select",
 "Well, {s21}, at last I've found you. {s11}. The rest of my report I submit to you in writing.", "companion_rejoin_response", [
 ]],
 
-
 # ##SB : dplmc_npc_mission_rescue_prisoner aborted
-# [anyone, "event_triggered", [
- # (store_conversation_troop, "$map_talk_troop"),
- # (is_between, "$map_talk_troop", companions_begin, companions_end),
- # (eq, "$map_talk_troop", "$npc_to_rejoin_party"),
- # (troop_slot_eq, "$map_talk_troop", slot_troop_current_mission, dplmc_npc_mission_rescue_prisoner),
- # (troop_slot_eq, "$g_talk_troop", dplmc_slot_troop_mission_diplomacy, -2),
+ [anyone, "event_triggered", [
+  (store_conversation_troop, "$map_talk_troop"),
+  (is_between, "$map_talk_troop", companions_begin, companions_end),
+  (eq, "$map_talk_troop", "$npc_to_rejoin_party"),
+  (troop_slot_eq, "$map_talk_troop", slot_troop_current_mission, dplmc_npc_mission_rescue_prisoner),
+  (troop_slot_eq, "$g_talk_troop", dplmc_slot_troop_mission_diplomacy, -2),
 
- # (troop_get_slot, ":string", "$map_talk_troop", slot_troop_honorific),
- # (str_store_string, s21, ":string"),
+  (troop_get_slot, ":string", "$map_talk_troop", slot_troop_honorific),
+  (str_store_string, s21, ":string"),
 
- # (troop_get_slot, ":town_with_contacts", "$map_talk_troop", slot_troop_town_with_contacts),
- # (troop_get_slot, ":prisoner", "$map_talk_troop", slot_troop_mission_object),
- # (str_store_troop_name, s11, ":prisoner"),
- # (str_store_party_name, s12, ":town_with_contacts"),
- # (call_script, "script_dplmc_store_troop_is_female_reg", ":prisoner", 4),
+  (troop_get_slot, ":town_with_contacts", "$map_talk_troop", slot_troop_town_with_contacts),
+  (troop_get_slot, ":prisoner", "$map_talk_troop", slot_troop_mission_object),
+  (str_store_troop_name, s11, ":prisoner"),
+  (str_store_party_name, s12, ":town_with_contacts"),
+  (call_script, "script_dplmc_store_troop_is_female_reg", ":prisoner", 4),
 
- # ],
-# "Well, {s21}, it seems somebody got to {s11} before I did, still, I enjoyed the time I had in {s12} even if I didn't manage to make contact with the {reg4?lady:lord}.", "companion_rejoin_response", 
-# []],
+  ],
+ "Well, {s21}, it seems somebody got to {s11} before I did, still, I enjoyed the time I had in {s12} even if I didn't manage to make contact with the {reg4?lady:lord}.", "companion_rejoin_response", 
+ []],
 
 ##SB : dplmc_npc_mission_rescue_prisoner failed
 [anyone, "event_triggered", [
@@ -14576,9 +14695,6 @@ What kind of recruits do you want?", "dplmc_constable_recruit_select",
   (troop_set_health, "$g_talk_troop", 0),
   (party_add_prisoners, ":center_no", "$g_talk_troop", 1),
 ]],
-
-
-
 
 [anyone, "event_triggered", [
                (store_conversation_troop, "$map_talk_troop"),
@@ -15686,8 +15802,7 @@ Here, take this purse of {reg3} denars, as I promised. I hope we can travel toge
 [anyone,"lord_prison_break_confirm_4", [
 
 (str_clear, s14),
-(assign, ":end", kingdom_ladies_end), #SB : loop breaking
-(try_for_range, ":other_prisoner", active_npcs_begin, ":end"),
+  (try_for_range, ":other_prisoner", active_npcs_begin, kingdom_ladies_end),        
   (troop_slot_eq, ":other_prisoner", slot_troop_prisoner_of_party, "$g_encountered_party"),
   (neq, ":other_prisoner", "$g_talk_troop"),
 
@@ -15699,17 +15814,11 @@ Here, take this purse of {reg3} denars, as I promised. I hope we can travel toge
   (eq, ":granted_parole", 0),
 
   (troop_slot_eq, ":other_prisoner", slot_troop_mission_participation, 0),
-
-  (str_store_troop_name, s15, ":other_prisoner"),
-
-    ##diplomacy start+
-    ##OLD:
-    #(troop_get_type, reg4, ":other_prisoner"),
-    ##NEW:
-  (call_script, "script_dplmc_store_troop_is_female_reg", ":other_prisoner", 4), #SB : script call
-    ##diplomacy end+
+	
+	(str_store_troop_name, s15, ":other_prisoner"),
+	
+	(troop_get_type, reg4, ":other_prisoner"),
   (str_store_string, s14, "str__s15_is_also_being_held_here_and_you_may_wish_to_see_if_reg4shehe_will_join_us"),
-  (assign, ":end", active_npcs_begin), #SB : loop break
 (try_end),
 ],
 "Let's go!{s14}", "close_window",
@@ -15770,73 +15879,6 @@ Here, take this purse of {reg3} denars, as I promised. I hope we can travel toge
 ##++END-VEXED++##
 #    (troop_get_slot, ":cur_rank", "$g_talk_troop", slot_troop_kingdom_rank),
 #    (val_mul, ":cur_rank", 1),
-##diplomacy start+
-#Relationship boost for freeing lords.
-(call_script, "script_dplmc_is_affiliated_family_member", "$g_talk_troop"),
-(assign, ":talk_troop_is_affiliate", reg0),
-(try_for_range, ":npc", heroes_begin, heroes_end),
-	(store_troop_faction, ":npc_faction", ":npc"),
-	(store_relation, reg0, ":npc_faction", "$g_talk_troop_faction"),
-	(this_or_next|eq, ":npc_faction", "$g_talk_troop_faction"),
-		(ge, reg0, 0),
-	(neq, ":npc", "$g_talk_troop"),
-	(neg|troop_slot_eq, ":npc", slot_troop_occupation, dplmc_slto_dead),
-	(call_script, "script_troop_get_player_relation", ":npc"),
-	(assign, ":relation_with_player", reg0),
-	(assign, ":player_relation_change", 0),
-	(try_begin),
-		#Affiliate to a family: improve relations for freeing lords
-		(ge, ":talk_troop_is_affiliate", 1),
-		(call_script, "script_dplmc_is_affiliated_family_member", ":npc"),
-		(ge, reg0, 1),
-
-		(try_begin),
-			(lt, ":relation_with_player", 0),
-			(assign, ":player_relation_change", 2),
-		(else_try),
-			(lt, ":relation_with_player", 10),
-			(assign, ":player_relation_change", 2),
-		(else_try),
-			(lt, ":relation_with_player", 20),
-			(store_random_in_range, ":player_relation_change", 0, 2),
-		(else_try),
-			(lt, ":relation_with_player", 40),
-			(store_random_in_range, ":player_relation_change", -1, 2),
-			(val_max, ":player_relation_change", 0),
-		(try_end),
-		(gt, ":player_relation_change", 0),
-		(call_script, "script_change_player_relation_with_troop", ":npc", ":player_relation_change"),
-	(else_try),
-		#Lords friendly and/or related to the troop
-		(call_script, "script_troop_get_relation_with_troop", ":npc", "$g_talk_troop"),
-		(assign, ":relation", reg0),
-		(try_begin),
-			(ge, ":relation", 20),
-			(store_random_in_range, reg0, 0, 2),
-			(this_or_next|ge, ":relation", ":relation_with_player"),
-				(eq, reg0, 1),
-			(assign, ":player_relation_change", 1),
-		(try_end),
-		(try_begin),
-			(ge, ":relation", 0),
-			(troop_slot_eq, ":npc", slot_troop_betrothed, "$g_talk_troop"),
-			(val_add, ":player_relation_change", 1),
-		(else_try),
-			(ge, ":relation", 0),
-			(this_or_next|troop_slot_eq, ":npc", slot_troop_occupation, slto_kingdom_lady),
-				(is_between, ":npc", kingdom_ladies_begin, kingdom_ladies_end),
-			(call_script, "script_troop_get_family_relation_to_troop", ":npc", "$g_talk_troop"),
-			(ge, reg0, 4),
-			(store_random_in_range, reg0, 0, 2),
-			(this_or_next|troop_slot_eq, ":npc", slot_lord_reputation_type, lrep_conventional),
-			   (eq, reg0, 1),
-			(val_add, ":player_relation_change", 1),
-		(try_end),
-		(gt, ":player_relation_change", 0),
-		(call_script, "script_change_player_relation_with_troop", ":npc", ":player_relation_change"),
-	(try_end),
-(try_end),
-##diplomacy end+
 (call_script, "script_change_player_relation_with_faction_ex", "$g_talk_troop_faction", 2)]],
 
 [anyone,"freed_lord_answer_2", [],
@@ -40441,7 +40483,7 @@ I suppose there are plenty of bounty hunters around to get the job done . . .", 
     ]],
 
   [anyone|plyr,"merchant_quest_brief_deliver_wine", [], "I am afraid I can't carry all that cargo now.", "merchant_quest_stall",[]],
-
+###Vexedcaravan
 #escort merchant caravan:
   [anyone,"merchant_quest_requested", [(eq,"$random_merchant_quest_no","qst_escort_merchant_caravan")], "You're looking for a job?\
  Actually I was looking for someone to escort a caravan.\
@@ -40547,18 +40589,13 @@ I suppose there are plenty of bounty hunters around to get the job done . . .", 
    "Eh. We've made it this far... What do you want us to do?", "escort_merchant_caravan_talk",[]],
 
   [anyone|plyr,"escort_merchant_caravan_talk", [], "You follow my lead. I'll take you through a safe route.", "merchant_caravan_follow_lead",[]],
-  [anyone,"merchant_caravan_follow_lead", [], "Alright. We'll be right behind you.", "close_window",[
-    (party_set_ai_behavior, "$g_encountered_party", ai_bhvr_hold),
-    (party_set_flags, "$g_encountered_party", pf_default_behavior, 0),
+  [anyone,"merchant_caravan_follow_lead", [], "Alright. We'll be right behind you.", "close_window",[(assign, "$escort_merchant_caravan_mode", 0),
     (assign, "$g_leave_encounter", 1)]],
   [anyone|plyr,"escort_merchant_caravan_talk", [], "You stay here for a while. I'll go ahead and check the road.", "merchant_caravan_stay_here",[]],
-  [anyone,"merchant_caravan_stay_here", [], "Alright. We'll be waiting here for you.", "close_window",[
-    (party_set_ai_behavior, "$g_encountered_party", ai_bhvr_escort_party),
-    (party_set_flags, "$g_encountered_party", pf_default_behavior, 0),
-    (party_set_ai_object, "$g_encountered_party", "p_main_party"),
+  [anyone,"merchant_caravan_stay_here", [], "Alright. We'll be waiting here for you.", "close_window",[(assign, "$escort_merchant_caravan_mode", 1),
     (assign, "$g_leave_encounter", 1)]],
 #  [anyone|plyr,"escort_merchant_caravan_talk", [], "You go ahead to {s1}. I'll catch up with you.", "merchant_caravan_go_to_destination",[]],
-#  [anyone,"merchant_caravan_go_to_destination", [], "Alright. But stay close.", "close_window",[[assign,"escort_merchant_caravan_mode",2]]],
+ # [anyone,"merchant_caravan_go_to_destination", [], "Alright. But stay close.", "close_window",[[assign,"$escort_merchant_caravan_mode",2]]],
 
 
 # Troublesome bandits:
@@ -42319,15 +42356,17 @@ I suppose there are plenty of bounty hunters around to get the job done . . .", 
   #SB : add conditions for fighting with a chosen weapon
   [anyone|plyr,"arena_master_melee_talk", [
     (neg|troop_is_wounded, "trp_player"),
-    (call_script, "script_dplmc_get_troop_standing_in_faction", "trp_player", "$g_encountered_party_faction"),
-    (this_or_next|ge, reg0, DPLMC_FACTION_STANDING_MEMBER),
-    (party_slot_ge, "$current_town", slot_center_player_relation, 15),
+	#VEXED START -- WE SHOULD NOT NEED 15 RELATION TO CHOOSE WEAPON!
+    #(call_script, "script_dplmc_get_troop_standing_in_faction", "trp_player", "$g_encountered_party_faction"),
+   # (this_or_next|ge, reg0, DPLMC_FACTION_STANDING_MEMBER),
+   # (party_slot_ge, "$current_town", slot_center_player_relation, 15),
+   #VEXED END -- *SHAKES ANGRY FIST*
   ], "Good. Let me look through the weapons rack first.", "arena_master_melee_weapon_select",
-   [(store_random_in_range, "$g_player_entry_point", 32, 40), #the 8 arena sparring entries
+   [(store_random_in_range, "$g_player_entry_point", 32, 49), #the 8 arena sparring entries #49 old
     ]],
   #from CC
-  [anyone,"arena_master_melee_weapon_select", [], "Well, please choose a weapon which you'd like to use in the melee.", "arena_player_melee_weapon_select",[]],
-  [anyone|plyr,"arena_player_melee_weapon_select", [], "Two-handed Sword.", "arena_melee_weapon_select_end",
+  [anyone,"arena_master_melee_weapon_select", [], "Please choose a weapon which you'd like to use in the arena.", "arena_player_melee_weapon_select",[]],
+  [anyone|plyr,"arena_player_melee_weapon_select", [], "Two-handed sword.", "arena_melee_weapon_select_end",
     [
       (store_random_in_range, ":random_num", 0, 60),
       (try_begin),
@@ -42337,7 +42376,7 @@ I suppose there are plenty of bounty hunters around to get the job done . . .", 
         (assign, "$g_player_entry_point", 38),
       (try_end),
     ]],
-  [anyone|plyr,"arena_player_melee_weapon_select", [], "Staff.", "arena_melee_weapon_select_end",
+  [anyone|plyr,"arena_player_melee_weapon_select", [], "Two-handed staff.", "arena_melee_weapon_select_end",
     [
       (store_random_in_range, ":random_num", 0, 60),
       (try_begin),
@@ -42350,7 +42389,7 @@ I suppose there are plenty of bounty hunters around to get the job done . . .", 
         (assign, "$g_player_entry_point", 39),
       (try_end),
     ]],
-  [anyone|plyr,"arena_player_melee_weapon_select", [], "Sword and Board.", "arena_melee_weapon_select_end",
+  [anyone|plyr,"arena_player_melee_weapon_select", [], "One-Handed sword and shield.", "arena_melee_weapon_select_end",
     [
       (store_random_in_range, ":random_num", 0, 60),
       (try_begin),
@@ -42364,6 +42403,66 @@ I suppose there are plenty of bounty hunters around to get the job done . . .", 
     [
       (assign, "$g_player_entry_point", 36),
     ]],
+	#page 2
+  [anyone|plyr,"arena_player_melee_weapon_select", [], "Page two, please", "arena_master_melee_weapon_select_2",[]],
+  [anyone,"arena_master_melee_weapon_select_2", [], "Here is page two", "arena_player_melee_weapon_select_2",[]],
+  
+    [anyone|plyr,"arena_player_melee_weapon_select_2", [], "Lance and shield", "arena_melee_weapon_select_end",
+    [
+      (assign, "$g_player_entry_point", 40),
+    ]],
+  [anyone|plyr,"arena_player_melee_weapon_select_2", [], "Cossbow", "arena_melee_weapon_select_end",
+    [
+      (assign, "$g_player_entry_point", 41),
+    ]],
+  [anyone|plyr,"arena_player_melee_weapon_select_2", [], "Javelin", "arena_melee_weapon_select_end",
+    [
+      (assign, "$g_player_entry_point", 42),
+    ]],
+  [anyone|plyr,"arena_player_melee_weapon_select_2", [], "Sledgehammer", "arena_melee_weapon_select_end",
+    [
+      (assign, "$g_player_entry_point", 43),
+    ]],
+  [anyone|plyr,"arena_player_melee_weapon_select_2", [], "Two-Handed cleaver", "arena_melee_weapon_select_end",
+    [
+      (assign, "$g_player_entry_point", 44),
+    ]],
+  [anyone|plyr,"arena_player_melee_weapon_select_2", [], "Wooden stick", "arena_melee_weapon_select_end",
+    [
+      (assign, "$g_player_entry_point", 46),
+    ]],
+  [anyone|plyr,"arena_player_melee_weapon_select_2", [], "Shortened Military Scythe", "arena_melee_weapon_select_end",
+    [
+      (assign, "$g_player_entry_point", 48),
+    ]],
+  [anyone|plyr,"arena_player_melee_weapon_select_2", [], "Spiked Club", "arena_melee_weapon_select_end",
+    [
+      (assign, "$g_player_entry_point", 49),
+    ]],
+  [anyone|plyr,"arena_player_melee_weapon_select_2", [], "Throwing stones", "arena_melee_weapon_select_end",
+    [
+      (assign, "$g_player_entry_point", 45),
+    ]],
+  [anyone|plyr,"arena_player_melee_weapon_select_2", [], "Throwing Axes", "arena_melee_weapon_select_end",
+    [
+      (assign, "$g_player_entry_point", 47),
+    ]],
+  #SB : add conditions for fighting with a random weapon
+  [anyone|plyr,"arena_player_melee_weapon_select_2", [], "Give me a weapon that you believe is best for me", "close_window",
+   [
+    (assign, "$last_training_fight_town", "$current_town"),
+    (store_current_hours,"$training_fight_time"),
+    (assign, "$g_mt_mode", abm_training),
+    (party_get_slot, ":scene","$current_town",slot_town_arena),
+    (modify_visitors_at_site,":scene"),
+    (reset_visitors),
+    (store_random_in_range, "$g_player_entry_point", 32, 49),
+    (set_visitor, "$g_player_entry_point", "trp_player"),
+    (set_jump_mission,"mt_arena_melee_fight"),
+    (jump_to_scene, ":scene"),
+    ]],
+  [anyone|plyr,"arena_player_melee_weapon_select_2", [], "Go back", "arena_master_melee_weapon_select",[]],
+
   [anyone,"arena_melee_weapon_select_end", [], "Good luck to you.", "close_window",
     [
       (assign, "$last_training_fight_town", "$current_town"),
@@ -42379,22 +42478,22 @@ I suppose there are plenty of bounty hunters around to get the job done . . .", 
     ]],
   ## CC
   #SB : add conditions for fighting with a random weapon
-  [anyone|plyr,"arena_master_melee_talk", [
-    (neg|troop_is_wounded, "trp_player"),
-  ], "Good. That's what I am going to do.", "close_window",
-   [
-    (assign, "$last_training_fight_town", "$current_town"),
-    (store_current_hours,"$training_fight_time"),
-    (assign, "$g_mt_mode", abm_training),
+#  [anyone|plyr,"arena_master_melee_talk", [
+ #   (neg|troop_is_wounded, "trp_player"),
+#  ], "Good. That's what I am going to do.", "close_window",
+ #  [
+  #  (assign, "$last_training_fight_town", "$current_town"),
+  #  (store_current_hours,"$training_fight_time"),
+  #  (assign, "$g_mt_mode", abm_training),
     # (party_get_slot, ":scene","$current_town",slot_town_arena),
-    (store_current_scene, ":scene"),
-    (modify_visitors_at_site,":scene"),
-    (reset_visitors),
-    (store_random_in_range, "$g_player_entry_point", 32, 40),
-    (set_visitor, "$g_player_entry_point", "trp_player"),
-    (set_jump_mission,"mt_arena_melee_fight"),
-    (jump_to_scene, ":scene"),
-    ]],
+   # (store_current_scene, ":scene"),
+  #  (modify_visitors_at_site,":scene"),
+ #   (reset_visitors),
+ #   (store_random_in_range, "$g_player_entry_point", 32, 40),
+#    (set_visitor, "$g_player_entry_point", "trp_player"),
+ #   (set_jump_mission,"mt_arena_melee_fight"),
+ #   (jump_to_scene, ":scene"),
+#    ]],
   [anyone|plyr,"arena_master_melee_talk", [], "Thanks. But I will give my bruises some time to heal.", "arena_master_melee_reject",[]],
   [anyone,"arena_master_melee_reject", [], "Good {man/girl}. That's clever of you.", "arena_master_pre_talk",[]],
 
@@ -44669,4 +44768,3 @@ I suppose there are plenty of bounty hunters around to get the job done . . .", 
   [anyone|plyr,"free", [[neg|in_meta_mission]], " [Leave]", "close_window",[]],
 #  [anyone,"free", [], "NO MATCHING SENTENCE!", "close_window",[]],
 ]
-

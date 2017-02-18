@@ -5402,10 +5402,10 @@ scripts = [
       (assign, ":troop_no", "trp_player"),
 
 ##++START-VEXED++##
-      (assign, ":limit", 100),
+      (assign, ":limit", 100),#100
       (store_skill_level, ":skill", "skl_leadership", ":troop_no"),
       (store_attribute_level, ":charisma", ":troop_no", ca_charisma),
-      (val_mul, ":skill", 100),
+      (val_mul, ":skill", 100), #100
       (val_add, ":limit", ":skill"),
       (val_add, ":limit", ":charisma"),
 
@@ -15018,7 +15018,7 @@ scripts = [
         (party_stack_get_troop_id, ":party_leader", ":party_no", 0),
         (store_faction_of_party, ":faction_id", ":party_no"),
 
-        #default limit is 10 for kingdom lords
+        #default limit is 10 for kingdom lords 
         (assign, ":limit", 30),
 
         #each (leadership level) gives 5 to limit
@@ -15150,7 +15150,7 @@ scripts = [
       (store_add, ":level_factor", 80, ":level"),
       (val_mul, ":limit", ":level_factor"),
 ##++START-VEXED++##
-      (val_div, ":limit", 60),
+      (val_div, ":limit", 60), #60
       (assign, reg0, ":limit"),
 ##++END-VEXED++##
   ]),
@@ -15653,7 +15653,7 @@ scripts = [
       (eq,":party_no","p_main_party"),
       (eq,"$g_move_fast", 1),
 ##++START-VEXED++##
-      (val_mul,":speed_multiplier",100),
+      (val_mul,":speed_multiplier",3),
 ##++END-VEXED++##
     (try_end),
 
@@ -37672,8 +37672,10 @@ scripts = [
   ("update_mercenary_units_of_towns",
     [(try_for_range, ":town_no", towns_begin, towns_end),
       (store_random_in_range, ":troop_no", mercenary_troops_begin, mercenary_troops_end),
-      (party_set_slot, ":town_no", slot_center_mercenary_troop_type, ":troop_no"),
-      (store_random_in_range, ":amount", 3, 8),
+      (party_set_slot, ":town_no", ##++START-VEXED++##
+slot_center_mercenary_troop_type, ":troop_no"),
+      (store_random_in_range, ":amount", 30, 300),
+##++END-VEXED++##
 	  ##diplomacy start+
 	  #OPTIONAL CHANGE: The same way that lord party sizes increase as the player
 	  #progresses, also increase mercenary party sizes to maintain their relevance.
@@ -37723,7 +37725,9 @@ scripts = [
          (assign, ":volunteer_troop", ":upgrade_troop_no"),
        (try_end),
 
-       (assign, ":upper_limit", 8),
+##++START-VEXED++##
+       (assign, ":upper_limit", 15),
+##++END-VEXED++##
        (try_begin),
          (ge, ":player_relation", 4),
          (assign, ":upper_limit", ":player_relation"),
@@ -37784,7 +37788,9 @@ scripts = [
        (store_add, ":amount_random_divider", 2, ":volunteer_troop_tier"),
        (val_div, ":upper_limit", ":amount_random_divider"),
 
-       (store_random_in_range, ":amount", 0, ":upper_limit"),
+##++START-VEXED++##
+       (store_random_in_range, ":amount", 5, ":upper_limit"),
+##++END-VEXED++##
        (party_set_slot, ":center_no", slot_center_volunteer_troop_type, ":volunteer_troop"),
        (party_set_slot, ":center_no", slot_center_volunteer_troop_amount, ":amount"),
      ]),
@@ -39564,7 +39570,8 @@ scripts = [
 
      (try_begin),
        (store_num_parties_of_template, ":num_parties", "pt_mountain_bandits"),
-       (lt,":num_parties",16), #was 14 at mount&blade, 18 in warband, 16 last decision
+##++START-VEXED++##
+       (lt,":num_parties",20), #was 14 at mount&blade, 18 in warband, 16 last decision
        (store_random,":spawn_point",num_mountain_bandit_spawn_points),
        (val_add,":spawn_point","p_mountain_bandit_spawn_point"),
        (set_spawn_radius, 25),
@@ -39572,7 +39579,7 @@ scripts = [
      (try_end),
      (try_begin),
        (store_num_parties_of_template, ":num_parties", "pt_forest_bandits"),
-       (lt,":num_parties",16), #was 14 at mount&blade, 18 in warband, 16 last decision
+       (lt,":num_parties",20), #was 14 at mount&blade, 18 in warband, 16 last decision
        (store_random,":spawn_point",num_forest_bandit_spawn_points),
        (val_add,":spawn_point","p_forest_bandit_spawn_point"),
        (set_spawn_radius, 25),
@@ -39580,7 +39587,7 @@ scripts = [
      (try_end),
      (try_begin),
        (store_num_parties_of_template, ":num_parties", "pt_sea_raiders"),
-       (lt,":num_parties",16), #was 14 at mount&blade, 18 in warband, 16 last decision
+       (lt,":num_parties",20), #was 14 at mount&blade, 18 in warband, 16 last decision
        (store_random,":spawn_point",num_sea_raider_spawn_points),
        (val_add,":spawn_point","p_sea_raider_spawn_point_1"),
        (set_spawn_radius, 25),
@@ -39588,7 +39595,7 @@ scripts = [
      (try_end),
      (try_begin),
        (store_num_parties_of_template, ":num_parties", "pt_steppe_bandits"),
-       (lt,":num_parties",16), #was 14 at mount&blade, 18 in warband, 16 last decision
+       (lt,":num_parties",20), #was 14 at mount&blade, 18 in warband, 16 last decision
        (store_random,":spawn_point",num_steppe_bandit_spawn_points),
        (val_add,":spawn_point","p_steppe_bandit_spawn_point"),
        (set_spawn_radius, 25),
@@ -39596,7 +39603,7 @@ scripts = [
      (try_end),
      (try_begin),
        (store_num_parties_of_template, ":num_parties", "pt_taiga_bandits"),
-       (lt,":num_parties",16), #was 14 at mount&blade, 18 in warband, 16 last decision
+       (lt,":num_parties",20), #was 14 at mount&blade, 18 in warband, 16 last decision
        (store_random,":spawn_point",num_taiga_bandit_spawn_points),
        (val_add,":spawn_point","p_taiga_bandit_spawn_point"),
        (set_spawn_radius, 25),
@@ -39604,7 +39611,7 @@ scripts = [
      (try_end),
      (try_begin),
        (store_num_parties_of_template, ":num_parties", "pt_desert_bandits"),
-       (lt,":num_parties",16), #was 14 at mount&blade, 18 in warband, 16 last decision
+       (lt,":num_parties",20), #was 14 at mount&blade, 18 in warband, 16 last decision
        (store_random,":spawn_point",num_desert_bandit_spawn_points),
        (val_add,":spawn_point","p_desert_bandit_spawn_point"),
        (set_spawn_radius, 25),
@@ -39612,7 +39619,8 @@ scripts = [
      (try_end),
      (try_begin),
        (store_num_parties_of_template, ":num_parties", "pt_looters"),
-       (lt,":num_parties",42), #was 33 at mount&blade, 50 in warband, 42 last decision
+       (lt,":num_parties",52), #was 33 at mount&blade, 50 in warband, 42 last decision
+##++END-VEXED++##
        (store_random_in_range,":spawn_point",villages_begin,villages_end), #spawn looters twice to have lots of them at the beginning
        (set_spawn_radius, 25),
        (spawn_around_party,":spawn_point","pt_looters"),
@@ -40141,7 +40149,9 @@ scripts = [
      (try_begin),
        (is_between, ":center_no", villages_begin, villages_end),
        (party_slot_eq, ":center_no", slot_center_has_fish_pond, 1),
-       (val_add, ":ideal", 5),
+##++START-VEXED++##
+       (val_add, ":ideal", 10),
+##++END-VEXED++##
      (try_end),
 
      (val_max, ":ideal", 0),
@@ -40990,7 +41000,9 @@ scripts = [
        (store_random_in_range, ":random_no", 0, 100),
        (try_begin),
          (faction_slot_eq, ":stack_troop_faction", slot_faction_state, sfs_active),
-         (le, ":random_no", 5),
+##++START-VEXED++##
+         (le, ":random_no", 35),
+##++END-VEXED++##
          (neq, "$g_ransom_offer_rejected", 1),
          (assign, ":num_stacks", 0), #break
          (assign, ":result", 1),
@@ -41725,25 +41737,26 @@ scripts = [
         (party_get_slot, ":player_odds", "$current_town", slot_town_player_odds),
         (try_begin),
           (eq, "$g_tournament_cur_tier", 0),
-          (assign, ":win_amount", 120),
+##++START-VEXED++##
+          (assign, ":win_amount", 600),
         (else_try),
           (eq, "$g_tournament_cur_tier", 1),
-          (assign, ":win_amount", 90),
+          (assign, ":win_amount", 450),
         (else_try),
           (eq, "$g_tournament_cur_tier", 2),
-          (assign, ":win_amount", 60),
+          (assign, ":win_amount", 300),
         (else_try),
           (eq, "$g_tournament_cur_tier", 3),
-          (assign, ":win_amount", 40),
+          (assign, ":win_amount", 200),
         (else_try),
           (eq, "$g_tournament_cur_tier", 4),
-          (assign, ":win_amount", 20),
+          (assign, ":win_amount", 100),
         (else_try),
-          (assign, ":win_amount", 8),
+          (assign, ":win_amount", 40),
         (try_end),
         (val_mul, ":win_amount", ":player_odds"),
-        (val_div, ":win_amount", 100),
-        (val_add, ":win_amount", 100), #win amount when 100 denars is placed
+        (val_div, ":win_amount", 500),
+        (val_add, ":win_amount", 500), #win amount when 100 denars is placed
         (assign, reg0, ":win_amount"),
      ]),
 
@@ -41756,7 +41769,8 @@ scripts = [
         (call_script, "script_get_win_amount_for_tournament_bet"),
         (assign, ":win_amount", reg0),
         (val_mul, ":win_amount", ":bet_amount"),
-        (val_div, ":win_amount", 100),
+        (val_div, ":win_amount", 500),
+##++END-VEXED++##
         (val_sub, ":win_amount", ":bet_amount"),
         (val_add, "$g_tournament_bet_placed", ":bet_amount"),
         (val_add, "$g_tournament_bet_win_amount", ":win_amount"),
@@ -49338,7 +49352,9 @@ scripts = [
 		(this_or_next|eq, ":groom", "trp_player"),
 			(eq, ":bride", "trp_player"),
 		##diplomacy start+ fix bug where player didn't get right to rule
-		(call_script, "script_change_player_right_to_rule", 15),##one argument, not two
+##++START-VEXED++##
+		(call_script, "script_change_player_right_to_rule", 33),##one argument, not two
+##++END-VEXED++##
 		##diplomacy end+
 	(try_end),
 
@@ -57243,8 +57259,10 @@ scripts = [
 		(lt, "$g_dplmc_gold_changes", DPLMC_GOLD_CHANGES_LOW),
 	    #fall through to default behavior
 	    ##diplomacy end+
-    (lt,":cur_gold",1500),
-    (store_random_in_range,":new_gold",500,1000),
+ ##++START-VEXED++##
+   (lt,":cur_gold",13500),
+    (store_random_in_range,":new_gold",500,2000),
+##++END-VEXED++##
     (call_script, "script_troop_add_gold", ":cur_merchant", ":new_gold"),
     ##diplomacy start+
     (try_end),
@@ -57289,8 +57307,10 @@ scripts = [
 			(lt, "$g_dplmc_gold_changes", DPLMC_GOLD_CHANGES_LOW),
 		    #fall through to default behavior
 		    ##diplomacy end+
-	    (lt,reg6,1000),
-	    (store_random_in_range,":new_gold",250,500),
+##++START-VEXED++##
+	    (lt,reg6,9000),
+	    (store_random_in_range,":new_gold",250,900),
+##++END-VEXED++##
 	    (call_script, "script_troop_add_gold", ":cur_merchant", ":new_gold"),
 		##diplomacy start+
 		(try_end),
@@ -57340,8 +57360,10 @@ scripts = [
 			(lt, "$g_dplmc_gold_changes", DPLMC_GOLD_CHANGES_LOW),
 		    #fall through to default behavior
 		    ##diplomacy end+
-	    (lt,reg6,1000),
-	    (store_random_in_range,":new_gold",250,500),
+##++START-VEXED++##
+	    (lt,reg6,9000),
+	    (store_random_in_range,":new_gold",250,900),
+##++END-VEXED++##
 	  (call_script, "script_troop_add_gold", ":cur_merchant", ":new_gold"),
 	  ##diplomacy start+
 	  (try_end),
@@ -57382,8 +57404,10 @@ scripts = [
 		(lt, "$g_dplmc_gold_changes", DPLMC_GOLD_CHANGES_LOW),
 	    #fall through to default behavior
 	    ##diplomacy end+
-    (lt,":cur_gold",600),
-    (store_random_in_range, ":new_gold", 250, 500),
+##++START-VEXED++##
+    (lt,":cur_gold",5400),
+    (store_random_in_range, ":new_gold", 250, 900),
+##++END-VEXED++##
     (call_script, "script_troop_add_gold", ":cur_merchant", ":new_gold"),
     ##diplomacy start+
     (try_end),
@@ -66702,7 +66726,7 @@ Days since last meeting: {reg49}^^Poems:^  {reg50?{s50}:no poem heard}"),
                 (str_store_faction_name, s48, ":party_faction"),
             (try_end),
 
-            # Days since last meeting
+            # Days since last meeting ##VEXED LOOK
             (store_current_hours, ":hours_since_last_visit"),
             (troop_get_slot, ":last_visit_hour", ":troop_no", slot_troop_last_talk_time),
             (val_sub, ":hours_since_last_visit", ":last_visit_hour"),
@@ -71872,7 +71896,7 @@ Born at {s43}^Contact in {s44} of the {s45}.^\
    #SB : new features
    (try_begin),
       (is_between, ":diplomacy_version_code", 0, 170001), #1.171 invasion patch
-      (display_log_message, "@Performing 2017 updates, thank you for your patience!", message_positive),
+      #(display_log_message, "@Performing 2017 updates, thank you for your patience!", message_positive),
       #set up camera keys
       (call_script, "script_setup_camera_keys"),
 
